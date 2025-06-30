@@ -1,103 +1,151 @@
+"use client";
+
 import Image from "next/image";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import PageWrapper from "@/components/PageWrapper";
+import { Typewriter } from "react-simple-typewriter";
+import { useEffect, useRef, useState } from "react";
+import ContactForm from "@/components/Contact";
+import { Button } from "@/components/ui/button";
+import Resume from "@/components/resume";
+import About from "@/components/about";
+import { Sparkles } from "lucide-react";
 
-export default function Home() {
+export default function HomePage() {
+  const [unlocked, setUnlocked] = useState(false);
+  const [code, setCode] = useState("");
+  const [error, setError] = useState(false);
+  const audioRef = useRef(null);
+
+  // Handle "Enter" key
+  useEffect(() => {
+    const listener = (e) => {
+      if (e.key === "Enter" && !unlocked) handleUnlock();
+    };
+    window.addEventListener("keydown", listener);
+    return () => window.removeEventListener("keydown", listener);
+  }, [code]);
+
+  const handleUnlock = () => {
+    if (code.toLowerCase() === "professor") {
+      setUnlocked(true);
+      audioRef.current?.play();
+    } else {
+      setError(true);
+      setTimeout(() => setError(false), 1000);
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <PageWrapper>
+      {!unlocked ? (
+        // 🔒 Lock Screen UI
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center text-white bg-black"
+          style={{
+            backgroundImage: `url('/vault-bg.jpg')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
           >
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+              src="/dali-mask.png"
+              alt="Vault Mask"
+              width={100}
+              height={100}
+              className="mb-6 drop-shadow-md"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </motion.div>
+
+          <h1 className="text-3xl md:text-4xl font-bold text-red-500 mb-4">
+            Secure Vault Access
+          </h1>
+
+          {/* Terminal Input Prompt */}
+          <div className="bg-black/80 text-green-400 font-mono px-6 py-4 rounded-lg shadow-md mb-6 w-[90%] max-w-md text-left border border-green-500">
+            <p>$ Enter access key:</p>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className={`bg-transparent border-none outline-none text-green-300 w-full mt-2 ${
+                error ? "animate-shake text-red-500" : ""
+              }`}
+              autoFocus
+              placeholder="professor"
+            />
+            {error && (
+              <p className="text-sm text-red-500 mt-2">Access Denied</p>
+            )}
+          </div>
+
+          <motion.button
+            whileTap={{ scale: 0.95, rotate: [-1, 0, 1, 0] }}
+            className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-full shadow-xl hover:shadow-red-500/50 transition-all duration-300"
+            onClick={handleUnlock}
           >
-            Read our docs
-          </a>
+            🔓 Break In
+          </motion.button>
+
+          <audio ref={audioRef} src="/break-in.mp3" preload="auto" />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      ) : (
+        //  Home Page after Unlock
+        <div className="flex flex-col items-center justify-center text-center min-h-[80vh]">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 1 }}
+          >
+            <Image
+              src="/dali-mask.png"
+              alt="Dali Mask"
+              width={120}
+              height={120}
+              className="mb-4"
+            />
+          </motion.div>
+
+          <motion.h1
+            className="text-5xl font-bold text-red-600 mb-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            The Heist Begins
+          </motion.h1>
+
+          <p className="text-gray-300 max-w-xl mb-6 text-lg min-h-[60px]">
+            <Typewriter
+              words={[
+                "I'm Aryan Gupta — the mastermind behind this digital heist.",
+                "Full-stack developer executing pixel-perfect missions.",
+                "Deploying tools like React, Next.js, Tailwind & AI APIs.",
+              ]}
+              loop={0}
+              cursor
+              cursorStyle="|"
+              typeSpeed={45}
+              deleteSpeed={30}
+              delaySpeed={1500}
+            />
+          </p>
+
+          <Link href="/about">
+            <Button className="bg-red-600 cursor-pointer hover:bg-red-700 px-6 py-2 rounded-full flex items-center shadow-lg hover:shadow-red-500/50 transition duration-300">
+              Enter The War Room <Sparkles className="ml-2" />
+            </Button>
+          </Link>
+          <div>
+            <Resume></Resume>
+            <ContactForm></ContactForm>
+          </div>
+        </div>
+      )}
+    </PageWrapper>
   );
 }
