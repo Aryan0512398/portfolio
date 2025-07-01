@@ -10,13 +10,15 @@ function Resume() {
           Download my resume to get the blueprint of my operations, skills, and
           achievements.
         </p>
-        <a
-          href="https://drive.google.com/file/d/1jes6SnRnJGQWjmp93HU3pKqIsK73bGr3/view?usp=drivesdk"
-          target="_blank"
-          className="inline-block bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full  shadow-lg hover:shadow-red-500/50 transition duration-300"
-        >
-          📄 Download Resume
-        </a>
+       <a
+  href="https://drive.google.com/uc?export=download&id=1mznCX-oF7wAe_hO7LhYLDxxV6QCjpu8f"
+  target="_blank"
+  className="inline-block bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full shadow-lg hover:shadow-red-500/50 transition duration-300"
+  download
+>
+  📄 Download Resume
+</a>
+
       </div>
     </PageWrapper>
   );
