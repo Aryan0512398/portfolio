@@ -1,102 +1,153 @@
 "use client";
-
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import PageWrapper from "@/components/PageWrapper";
-import { Typewriter } from "react-simple-typewriter";
-import { useEffect, useRef, useState } from "react";
-import ContactForm from "@/components/Contact";
 import { Button } from "@/components/ui/button";
 import Resume from "@/components/resume";
-import About from "@/components/about";
+import ContactForm from "@/components/Contact";
+import { Typewriter } from "react-simple-typewriter";
 import { Sparkles } from "lucide-react";
+import Link from "next/link";
+import { useUnlock } from "./context/UnlockContext";
 
 export default function HomePage() {
-  const [unlocked, setUnlocked] = useState(false);
-  const [code, setCode] = useState("");
-  const [error, setError] = useState(false);
+  const [pin, setPin] = useState("");
+  const { unlocked, setUnlocked } = useUnlock();
   const audioRef = useRef(null);
 
-  // Handle "Enter" key
-  useEffect(() => {
-    const listener = (e) => {
-      if (e.key === "Enter" && !unlocked) handleUnlock();
-    };
-    window.addEventListener("keydown", listener);
-    return () => window.removeEventListener("keydown", listener);
-  }, [code]);
-
-  const handleUnlock = () => {
-    if (code.toLowerCase() === "professor") {
-      setUnlocked(true);
-      audioRef.current?.play();
-    } else {
-      setError(true);
-      setTimeout(() => setError(false), 1000);
+  const checkUnlock = (updatedPin) => {
+    if (updatedPin.length === 6) {
+      setTimeout(() => {
+        console.log("PIN complete — unlocking...");
+        setUnlocked(true);
+        audioRef.current?.play();
+      }, 300);
     }
   };
+
+  const handleKeyPress = (digit) => {
+    if (pin.length < 6) {
+      const updatedPin = pin + digit;
+      setPin(updatedPin);
+      checkUnlock(updatedPin);
+    }
+  };
+
+  const handleDelete = () => {
+    setPin((prev) => prev.slice(0, -1));
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!unlocked) {
+        const key = e.key;
+        if (/^\d$/.test(key) && pin.length < 6) {
+          const updatedPin = pin + key;
+          setPin(updatedPin);
+          checkUnlock(updatedPin);
+        } else if (key === "Backspace") {
+          handleDelete();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [pin, unlocked]);
+
+  const digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"];
 
   return (
     <PageWrapper>
       {!unlocked ? (
-        // 🔒 Lock Screen UI
-        <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center text-white bg-black"
-          style={{
-            backgroundImage: `url('/vault-bg.jpg')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
+        <div className="fixed inset-0 flex items-center justify-center bg-black">
+          {/* 🎥 Background Video */}
+          <video
+            className="absolute inset-0 object-cover w-full h-full z-[-1]"
+            autoPlay
+            loop
+            muted
+            playsInline
           >
-            <Image
-              src="/dali-mask.png"
-              alt="Vault Mask"
-              width={100}
-              height={100}
-              className="mb-6 drop-shadow-md"
-            />
-          </motion.div>
+            <source src="/vault5.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-red-500 mb-4">
-            Secure Vault Access
-          </h1>
+          {/* Unlock UI */}
+          <div className="w-full flex justify-center px-4">
+            <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] max-w-xs sm:max-w-sm md:max-w-lg w-full p-6 md:p-10 flex flex-col items-center">
+              {/* Mask Icon */}
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+              >
+                <Image
+                  src="/dali-mask.png"
+                  alt="Dali Mask"
+                  width={70}
+                  height={70}
+                  className="mb-4"
+                />
+              </motion.div>
 
-          {/* Terminal Input Prompt */}
-          <div className="bg-black/80 text-green-400 font-mono px-6 py-4 rounded-lg shadow-md mb-6 w-[90%] max-w-md text-left border border-green-500">
-            <p>$ Enter access key:</p>
-            <input
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className={`bg-transparent border-none outline-none text-green-300 w-full mt-2 ${
-                error ? "animate-shake text-red-500" : ""
-              }`}
-              autoFocus
-              placeholder="professor"
-            />
-            {error && (
-              <p className="text-sm text-red-500 mt-2">Access Denied</p>
-            )}
+              <h2 className="text-white text-lg md:text-2xl font-semibold mb-6">
+                Enter Passcode
+              </h2>
+
+              {/* PIN Dots */}
+              <div className="flex justify-center gap-4 mb-8">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    animate={{
+                      scale: pin[i] ? [0.8, 1.2, 1] : 1,
+                      opacity: pin[i] ? 1 : 0.3,
+                    }}
+                    transition={{ duration: 0.2 }}
+                    className={`w-3 h-3 md:w-4 md:h-4 rounded-full ${
+                      pin[i] ? "bg-white" : "bg-white/30"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Keypad */}
+              <div className="grid grid-cols-3 gap-4 md:gap-6">
+                {digits.map((d, i) =>
+                  d === "" ? (
+                    <div key={i}></div>
+                  ) : d === "del" ? (
+                    <button
+                      key={i}
+                      onClick={handleDelete}
+                      className="text-white/80 text-xl font-semibold bg-white/10 hover:bg-white/20 rounded-full w-14 h-14 md:w-16 md:h-16 flex items-center justify-center transition-all backdrop-blur-md ring-1 ring-white/20 shadow-md"
+                    >
+                      ⌫
+                    </button>
+                  ) : (
+                    <button
+                      key={i}
+                      onClick={() => handleKeyPress(d)}
+                      className="text-white text-xl font-medium bg-white/10 hover:bg-white/20 rounded-full w-14 h-14 md:w-16 md:h-16 flex items-center justify-center transition-all backdrop-blur-md ring-1 ring-white/20 shadow-md"
+                    >
+                      {d}
+                    </button>
+                  )
+                )}
+              </div>
+
+              <p className="text-xs text-white/50 mt-6">
+                Use any 6-digit PIN to unlock
+              </p>
+
+              <audio ref={audioRef} src="/break-in.mp3" preload="auto" />
+            </div>
           </div>
-
-          <motion.button
-            whileTap={{ scale: 0.95, rotate: [-1, 0, 1, 0] }}
-            className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-full shadow-xl hover:shadow-red-500/50 transition-all duration-300"
-            onClick={handleUnlock}
-          >
-            🔓 Break In
-          </motion.button>
-
-          <audio ref={audioRef} src="/break-in.mp3" preload="auto" />
         </div>
       ) : (
-        //  Home Page after Unlock
-        <div className="flex flex-col items-center justify-center text-center min-h-[80vh]">
+        // ✅ Unlocked Content
+        <div className="flex flex-col items-center justify-center text-center min-h-[80vh] px-4">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -136,13 +187,14 @@ export default function HomePage() {
           </p>
 
           <Link href="/about">
-            <Button className="bg-red-600 cursor-pointer hover:bg-red-700 px-6 py-2 rounded-full flex items-center shadow-lg hover:shadow-red-500/50 transition duration-300">
+            <Button className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-full flex items-center shadow-lg hover:shadow-red-500/50 transition duration-300">
               Enter The War Room <Sparkles className="ml-2" />
             </Button>
           </Link>
+
           <div>
-            <Resume></Resume>
-            <ContactForm></ContactForm>
+            <Resume />
+            <ContactForm />
           </div>
         </div>
       )}
