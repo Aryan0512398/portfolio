@@ -48,6 +48,14 @@ const projects = [
     demo: "https://sleeptracker-gamma.vercel.app/",
     tags: ["Next.js", "Chart.js", "Tailwind"],
   },
+  {
+    img: "/coachwise.png",
+    name: "CoachWise",
+    desc: "AI career coaching platform with resume analysis, roadmap generation, and AI Q&A chat.",
+    github: "https://github.com/Aryan0512398/coachwise",
+    demo: "https://coachwise.vercel.app/",
+    tags: ["Next.js", "Gemini API", "Clerk"],
+  },
 ];
 
 export default function ProjectsPage() {
