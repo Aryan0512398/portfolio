@@ -11,7 +11,7 @@ function Resume() {
           achievements.
         </p>
        <a
-  href="https://drive.google.com/uc?export=download&id=1mznCX-oF7wAe_hO7LhYLDxxV6QCjpu8f"
+  href="https://drive.google.com/file/d/1IXDefpsgeHW6OHOIwfp3J39mp1Lt1pS6/view?usp=drivesdk"
   target="_blank"
   className="inline-block bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full shadow-lg hover:shadow-red-500/50 transition duration-300"
   download
